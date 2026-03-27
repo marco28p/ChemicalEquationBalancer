@@ -1,10 +1,6 @@
 from collections import defaultdict
 from sympy import Matrix, lcm
-import re
 
-# ----------------------------
-# CHEMICAL ELEMENT LIST
-# ----------------------------
 ELEMENTS = [
     'H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne',
     'Na', 'Mg', 'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca',
@@ -20,13 +16,11 @@ ELEMENTS = [
     'Rg', 'Cn', 'Fl', 'Lv', 'Ts', 'Og'
 ]
 
-# ----------------------------
-# PARSE MOLECULE
-# ----------------------------
+# parse molecule
 def parse_molecule(molecule):
-    """
-    Parse a molecule string like "Ca(OH)2" into a dict of element counts.
-    """
+
+    #Parse a molecule string like "Ca(OH)2" into a dict of element counts.
+
     def multiply_dict(d, factor):
         return {k: v * factor for k, v in d.items()}
 
@@ -67,19 +61,15 @@ def parse_molecule(molecule):
             elem_count[elem] += int(num) if num else 1
     return dict(elem_count)
 
-# ----------------------------
-# PARSE SIDE
-# ----------------------------
+# parse each side of the equation
 def parse_side(side):
-    """
-    Split a side like "H2 + O2" into molecule dicts
-    """
+
+    #Split a side like "H2 + O2" into molecule dicts
+
     molecules = side.split("+")
     return [parse_molecule(m.strip()) for m in molecules]
 
-# ----------------------------
-# BALANCE EQUATION
-# ----------------------------
+# balance the chemical equation
 def balance_equation(equation):
     left, right = equation.split("->")
     left_mols = parse_side(left)
@@ -93,35 +83,33 @@ def balance_equation(equation):
 
     # build matrix
     matrix = []
-    for el in elements:
+    for e in elements:
         row = []
         for m in left_mols:
-            row.append(m.get(el, 0))
+            row.append(m.get(e, 0))
         for m in right_mols:
-            row.append(-m.get(el, 0))
+            row.append(-m.get(e, 0))
         matrix.append(row)
 
     M = Matrix(matrix)
-    sol = M.nullspace()
-    if not sol:
+    solution = M.nullspace()
+    if not solution:
         raise ValueError("Cannot balance equation")
 
-    coeffs = sol[0]
-    lcm_val = lcm([r.q for r in coeffs])
-    coeffs = [int(r*lcm_val) for r in coeffs]
+    coefficients = solution[0]
+    lcm_val = lcm([r.q for r in coefficients])
+    coefficients = [int(r * lcm_val) for r in coefficients]
 
-    left_coeffs = coeffs[:len(left_mols)]
-    right_coeffs = coeffs[len(left_mols):]
+    left_coefficients = coefficients[:len(left_mols)]
+    right_coefficients = coefficients[len(left_mols):]
 
     # build balanced equation
-    left_str = " + ".join(f"{c if c>1 else ''}{m}" for c, m in zip(left_coeffs, left.split("+")))
-    right_str = " + ".join(f"{c if c>1 else ''}{m}" for c, m in zip(right_coeffs, right.split("+")))
+    left_str = " + ".join(f"{c if c>1 else ''}{m}" for c, m in zip(left_coefficients, left.split("+")))
+    right_str = " + ".join(f"{c if c>1 else ''}{m}" for c, m in zip(right_coefficients, right.split("+")))
 
     return f"{left_str} -> {right_str}"
 
-# ----------------------------
-# MAIN LOOP
-# ----------------------------
+# main loop
 print("Enter a chemical equation using '->'. Example: H2 + O2 -> H2O")
 equation = input("Equation: ")
 
