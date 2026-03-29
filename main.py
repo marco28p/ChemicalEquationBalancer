@@ -72,12 +72,12 @@ def parse_side(side):
 # balance the chemical equation
 def balance_equation(equation):
     left, right = equation.split("->")
-    left_mols = parse_side(left)
-    right_mols = parse_side(right)
+    left_moles = parse_side(left)
+    right_moles = parse_side(right)
 
     # list all elements
     elements = set()
-    for m in left_mols + right_mols:
+    for m in left_moles + right_moles:
         elements.update(m.keys())
     elements = sorted(elements)
 
@@ -85,9 +85,9 @@ def balance_equation(equation):
     matrix = []
     for e in elements:
         row = []
-        for m in left_mols:
+        for m in left_moles:
             row.append(m.get(e, 0))
-        for m in right_mols:
+        for m in right_moles:
             row.append(-m.get(e, 0))
         matrix.append(row)
 
@@ -100,8 +100,8 @@ def balance_equation(equation):
     lcm_val = lcm([r.q for r in coefficients])
     coefficients = [int(r * lcm_val) for r in coefficients]
 
-    left_coefficients = coefficients[:len(left_mols)]
-    right_coefficients = coefficients[len(left_mols):]
+    left_coefficients = coefficients[:len(left_moles)]
+    right_coefficients = coefficients[len(left_moles):]
 
     # build balanced equation
     left_str = " + ".join(f"{c if c>1 else ''}{m}" for c, m in zip(left_coefficients, left.split("+")))
