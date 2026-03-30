@@ -91,8 +91,8 @@ def balance_equation(equation):
             row.append(-m.get(e, 0))
         matrix.append(row)
 
-    M = Matrix(matrix)
-    solution = M.nullspace()
+    matrix = Matrix(matrix)
+    solution = matrix.nullspace()
     if not solution:
         raise ValueError("Cannot balance equation")
 
