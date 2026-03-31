@@ -21,8 +21,8 @@ def parse_molecule(molecule):
 
     #Parse a molecule string like "Ca(OH)2" into a dict of element counts.
 
-    def multiply_dict(d, factor):
-        return {k: v * factor for k, v in d.items()}
+    #def multiply_dict(d, factor):
+        #return {k: v * factor for k, v in d.items()}
 
     stack = []
     elem_count = defaultdict(int)
