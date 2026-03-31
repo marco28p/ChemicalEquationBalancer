@@ -115,7 +115,7 @@ equation = input("Equation: ")
 
 try:
     balanced = balance_equation(equation)
-    print("Balanced equation:")
+    print("Balanced equation: ")
     print(balanced)
 except Exception as e:
     print("Error:", e)
