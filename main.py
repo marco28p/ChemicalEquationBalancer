@@ -78,12 +78,12 @@ def balance_equation(equation):
 
     # build matrix
     matrix = []
-    for e in elements:
+    for i in elements:
         row = []
         for m in left_moles:
-            row.append(m.get(e, 0))
+            row.append(m.get(i, 0))
         for m in right_moles:
-            row.append(-m.get(e, 0))
+            row.append(-m.get(i, 0))
         matrix.append(row)
 
     matrix = Matrix(matrix)
