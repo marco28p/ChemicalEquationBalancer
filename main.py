@@ -20,12 +20,12 @@ ELEMENTS = [
 def parse_molecule(molecule):
 
     stack = []
-    elem_count = defaultdict(int)
+    element_count = defaultdict(int)
     i = 0
     while i < len(molecule):
         if molecule[i] == "(":
-            stack.append(elem_count)
-            elem_count = defaultdict(int)
+            stack.append(element_count)
+            element_count = defaultdict(int)
             i += 1
         elif molecule[i] == ")":
             i += 1
@@ -35,9 +35,9 @@ def parse_molecule(molecule):
                 i += 1
             factor = int(num) if num else 1
             prev = stack.pop()
-            for k, v in elem_count.items():
+            for k, v in element_count.items():
                 prev[k] += v * factor
-            elem_count = prev
+            element_count = prev
         else:
             # parse element
             if i+1 < len(molecule) and molecule[i+1].islower():
@@ -53,8 +53,8 @@ def parse_molecule(molecule):
             while i < len(molecule) and molecule[i].isdigit():
                 num += molecule[i]
                 i += 1
-            elem_count[elem] += int(num) if num else 1
-    return dict(elem_count)
+            element_count[elem] += int(num) if num else 1
+    return dict(element_count)
 
 # parse each side of the equation
 def parse_side(side):
