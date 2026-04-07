@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="4313fb32-d72d-4d24-8203-049af996a1ec" name="Changes" comment="this stuff auto-changed so..." />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;marco28p&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/marco28p/ChemicalEquationBalancer.git&quot;,
+    &quot;accountId&quot;: &quot;cd8de0e9-9407-4b69-9c60-9f649f2b0ef8&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
+  <component name="ProjectId" id="3BOQ4RHzoU7AHdAzeysycdIhOSG" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.main.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "kotlin-language-version-configured": "true",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "AndroidSdkUpdater"
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="ChemicalEquationBalancer" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="Python 3.13" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="main" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="true" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="4313fb32-d72d-4d24-8203-049af996a1ec" name="Changes" comment="" />
+      <created>1774357445126</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1774357445126</updated>
+    </task>
+    <task id="LOCAL-00001" summary="Adding main.py">
+      <option name="closed" value="true" />
+      <created>1774357537354</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1774357537355</updated>
+    </task>
+    <task id="LOCAL-00002" summary="IT WORKS!!!!">
+      <option name="closed" value="true" />
+      <created>1774574733379</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1774574733379</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Some formatting changes">
+      <option name="closed" value="true" />
+      <created>1774574945637</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1774574945637</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Renaming some variables and testing a very complicated equation (up to 355 moles)...it works!">
+      <option name="closed" value="true" />
+      <created>1774744331010</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1774744331010</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Renamed &quot;M&quot; to &quot;matrix&quot;">
+      <option name="closed" value="true" />
+      <created>1774832188562</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1774832188562</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Adding a space between message and result">
+      <option name="closed" value="true" />
+      <created>1774924149938</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1774924149938</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Commenting out an unnecessary function definition">
+      <option name="closed" value="true" />
+      <created>1774963721965</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1774963721965</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Commenting out an unnecessary function definition">
+      <option name="closed" value="true" />
+      <created>1775428556475</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1775428556475</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Renaming a variable to make more sense">
+      <option name="closed" value="true" />
+      <created>1775523096325</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1775523096325</updated>
+    </task>
+    <task id="LOCAL-00010" summary="this stuff auto-changed so...">
+      <option name="closed" value="true" />
+      <created>1775565065599</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1775565065599</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Adding main.py" />
+    <MESSAGE value="IT WORKS!!!!" />
+    <MESSAGE value="Some formatting changes" />
+    <MESSAGE value="Renaming some variables and testing a very complicated equation (up to 355 moles)...it works!" />
+    <MESSAGE value="Renamed &quot;M&quot; to &quot;matrix&quot;" />
+    <MESSAGE value="Adding a space between message and result" />
+    <MESSAGE value="Commenting out an unnecessary function definition" />
+    <MESSAGE value="Renaming a variable to make more sense" />
+    <MESSAGE value="this stuff auto-changed so..." />
+    <option name="LAST_COMMIT_MESSAGE" value="this stuff auto-changed so..." />
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
+  </component>
+</project>
