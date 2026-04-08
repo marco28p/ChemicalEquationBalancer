@@ -65,6 +65,7 @@ def parse_side(side):
     return [parse_molecule(m.strip()) for m in molecules]
 
 # balance the chemical equation
+# language: python
 def balance_equation(equation):
     left, right = equation.split("->")
     left_moles = parse_side(left)
@@ -93,16 +94,46 @@ def balance_equation(equation):
 
     coefficients = solution[0]
     lcm_val = lcm([r.q for r in coefficients])
-    coefficients = [int(r * lcm_val) for r in coefficients]
+    coeffs = [int(r * lcm_val) for r in coefficients]
 
-    left_coefficients = coefficients[:len(left_moles)]
-    right_coefficients = coefficients[len(left_moles):]
+    # normalize by gcd without extra imports
+    def _gcd(a, b):
+        a, b = abs(a), abs(b)
+        while b:
+            a, b = b, a % b
+        return a
+
+    g = 0
+    for x in coeffs:
+        g = _gcd(g, x)
+    if g > 1:
+        coeffs = [x // g for x in coeffs]
+
+    n_left = len(left_moles)
+    left_coeffs = coeffs[:n_left]
+    right_coeffs = coeffs[n_left:]
+
+    def all_positive(lst):
+        return all(x > 0 for x in lst)
+
+    # allow flipping the whole vector once; otherwise error
+    if not (all_positive(left_coeffs) and all_positive(right_coeffs)):
+        neg = [-x for x in coeffs]
+        left_n = neg[:n_left]
+        right_n = neg[n_left:]
+        if all_positive(left_n) and all_positive(right_n):
+            coeffs = neg
+            left_coeffs = left_n
+            right_coeffs = right_n
+        else:
+            raise ValueError("Cannot balance equation without moving species across the arrow")
 
     # build balanced equation
-    left_str = " + ".join(f"{c if c>1 else ''}{m}" for c, m in zip(left_coefficients, left.split("+")))
-    right_str = " + ".join(f"{c if c>1 else ''}{m}" for c, m in zip(right_coefficients, right.split("+")))
+    left_str = " + ".join(f"{c if c>1 else ''}{m}" for c, m in zip(left_coeffs, left.split("+")))
+    right_str = " + ".join(f"{c if c>1 else ''}{m}" for c, m in zip(right_coeffs, right.split("+")))
 
     return f"{left_str} -> {right_str}"
+
 
 # main loop
 print("Enter a chemical equation using '->'. Example: H2 + O2 -> H2O")
