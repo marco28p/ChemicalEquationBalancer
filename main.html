@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chemical Equation Balancer (JS)</title>
+  <style>
+    body { font-family: Inter, Roboto, "Segoe UI", Tahoma, monospace; background: #f6f8fa; color: #24292e; padding: 24px; }
+    .container { max-width: 980px; margin: 0 auto; }
+    h1 { font-size: 20px; margin-bottom: 8px; }
+    p.meta { color: #6a737d; margin-top: 0; }
+    textarea { width: 100%; min-height: 64px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; font-size: 14px; padding: 12px; border-radius: 6px; border: 1px solid #d0d7de; }
+    button { margin-top: 8px; padding: 8px 12px; border-radius: 6px; border: 1px solid #0969da; background: #0969da; color: white; cursor: pointer; }
+    pre { background: #0d1117; color: #c9d1d9; padding: 16px; border-radius: 8px; overflow: auto; box-shadow: 0 1px 0 rgba(27,31,35,0.04) inset; }
+    .error { color: #b91400; font-weight: bold; }
+    .example { color: #57606a; font-size: 13px; }
+    label { display:block; margin-bottom:6px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Chemical Equation Balancer</h1>
+    <p class="meta">Enter a chemical equation (use '->' between reactants and products). Example: <span class="example">H2 + O2 -&gt; H2O</span></p>
+
+    <label for="equation">Equation</label>
+    <textarea id="equation">H2 + O2 -> H2O</textarea>
+    <div>
+      <button id="balanceBtn">Balance</button>
+    </div>
+    <h2>Result</h2>
+    <div id="result"><pre id="out">(press Balance)</pre></div>
+    <div id="err" class="error" aria-live="polite"></div>
+
+    <hr />
+    <p class="meta">This page implements the same algorithm as the project's <code>main.py</code> but fully client-side in JavaScript (exact rational arithmetic using BigInt).</p>
+  </div>
+
+<script>
+// Elements list - same as Python list (subset/full)
+const ELEMENTS = new Set([
+ 'H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar','K','Ca',
+ 'Sc','Ti','V','Cr','Mn','Fe','Co','Ni','Cu','Zn','Ga','Ge','As','Se','Br','Kr','Rb','Sr','Y','Zr',
+ 'Nb','Mo','Tc','Ru','Rh','Pd','Ag','Cd','In','Sn','Sb','Te','I','Xe','Cs','Ba','La','Ce','Pr','Nd',
+ 'Pm','Sm','Eu','Gd','Tb','Dy','Ho','Er','Tm','Yb','Lu','Hf','Ta','W','Re','Os','Ir','Pt','Au','Hg',
+ 'Tl','Pb','Bi','Po','At','Rn','Fr','Ra','Ac','Th','Pa','U','Np','Pu','Am','Cm','Bk','Cf','Es','Fm',
+ 'Md','No','Lr','Rf','Db','Sg','Bh','Hs','Mt','Ds','Rg','Cn','Fl','Lv','Ts','Og'
+]);
+
+// Fraction implementation using BigInt
+function bigintGCD(a, b) {
+  a = a < 0n ? -a : a; b = b < 0n ? -b : b;
+  while (b !== 0n) {
+    const t = a % b;
+    a = b; b = t;
+  }
+  return a;
+}
+function bigintLCM(a, b) {
+  if (a === 0n || b === 0n) return 0n;
+  return (a / bigintGCD(a, b)) * b;
+}
+class Frac {
+  constructor(n, d = 1n) {
+    if (d === 0n) throw new Error('Zero denominator');
+    if (d < 0n) { n = -n; d = -d; }
+    const g = bigintGCD(n, d);
+    this.n = n / g; this.d = d / g;
+  }
+  static fromNumber(x) { // not used but handy
+    return new Frac(BigInt(Math.round(x*1000000)), 1000000n);
+  }
+  add(b) { return new Frac(this.n * b.d + b.n * this.d, this.d * b.d); }
+  sub(b) { return new Frac(this.n * b.d - b.n * this.d, this.d * b.d); }
+  mul(b) { return new Frac(this.n * b.n, this.d * b.d); }
+  div(b) { if (b.n === 0n) throw new Error('Divide by zero'); return new Frac(this.n * b.d, this.d * b.n); }
+  neg() { return new Frac(-this.n, this.d); }
+  isZero() { return this.n === 0n; }
+  eqZero() { return this.n === 0n; }
+  toString() { if (this.d === 1n) return this.n.toString(); return `${this.n}/${this.d}`; }
+}
+
+// Parsing molecule like H2O or Al2(SO4)3
+function parse_molecule(molecule) {
+  let stack = [];
+  let element_count = new Map();
+  let i = 0;
+  while (i < molecule.length) {
+    const ch = molecule[i];
+    if (ch === '(') {
+      stack.push(element_count);
+      element_count = new Map();
+      i++;
+    } else if (ch === ')') {
+      i++;
+      let num = '';
+      while (i < molecule.length && isDigit(molecule[i])) { num += molecule[i++]; }
+      const factor = num ? parseInt(num, 10) : 1;
+      const prev = stack.pop() || new Map();
+      for (const [k, v] of element_count.entries()) {
+        prev.set(k, (prev.get(k) || 0) + v * factor);
+      }
+      element_count = prev;
+    } else {
+      // parse element symbol (1 or 2 letters)
+      let elem = molecule[i];
+      if (i+1 < molecule.length && isLower(molecule[i+1])) { elem = molecule.substr(i, 2); i += 2; }
+      else { i += 1; }
+      if (!ELEMENTS.has(elem)) throw new Error('Unknown element: ' + elem);
+      let num = '';
+      while (i < molecule.length && isDigit(molecule[i])) { num += molecule[i++]; }
+      const cnt = num ? parseInt(num, 10) : 1;
+      element_count.set(elem, (element_count.get(elem) || 0) + cnt);
+    }
+  }
+  return Object.fromEntries(element_count);
+}
+function isDigit(ch) { return ch >= '0' && ch <= '9'; }
+function isLower(ch) { return ch >= 'a' && ch <= 'z'; }
+
+function parse_side(side) {
+  const molecules = side.split('+');
+  return molecules.map(m => parse_molecule(m.trim()));
+}
+
+// Build matrix of integers (rows: elements, cols: species)
+function buildMatrix(left_moles, right_moles) {
+  const elementsSet = new Set();
+  left_moles.concat(right_moles).forEach(m => Object.keys(m).forEach(e => elementsSet.add(e)));
+  const elements = Array.from(elementsSet).sort();
+  const nCols = left_moles.length + right_moles.length;
+  const M = elements.map(el => {
+    const row = [];
+    for (const m of left_moles) row.push(BigInt(m[el] || 0));
+    for (const m of right_moles) row.push(-BigInt(m[el] || 0));
+    return row;
+  });
+  return {M, elements};
+}
+
+// Compute RREF over rationals (Frac)
+function matrixToFrac(M) {
+  return M.map(row => row.map(x => new Frac(BigInt(x), 1n)));
+}
+
+function rref(fracMat) {
+  const m = fracMat.length, n = (m? fracMat[0].length: 0);
+  const A = fracMat.map(row => row.slice());
+  let r = 0;
+  const pivots = [];
+  for (let c = 0; c < n && r < m; c++) {
+    // find pivot in column c, starting at row r
+    let pivot = -1;
+    for (let i = r; i < m; i++) if (!A[i][c].isZero()) { pivot = i; break; }
+    if (pivot === -1) continue;
+    // swap
+    [A[r], A[pivot]] = [A[pivot], A[r]];
+    // normalize row r
+    const inv = A[r][c];
+    for (let j = c; j < n; j++) A[r][j] = A[r][j].div(inv);
+    // eliminate other rows
+    for (let i = 0; i < m; i++) {
+      if (i === r) continue;
+      const factor = A[i][c];
+      if (factor.isZero()) continue;
+      for (let j = c; j < n; j++) A[i][j] = A[i][j].sub(factor.mul(A[r][j]));
+    }
+    pivots.push(c);
+    r++;
+  }
+  return {A, pivots};
+}
+
+// Nullspace basis: return array of basis vectors (each vector is array of Frac)
+function nullspace(fracMat) {
+  const m = fracMat.length, n = (m? fracMat[0].length: 0);
+  if (n === 0) return [];
+  const {A, pivots} = rref(fracMat);
+  const pivotSet = new Set(pivots);
+  const freeCols = [];
+  for (let j = 0; j < n; j++) if (!pivotSet.has(j)) freeCols.push(j);
+  if (freeCols.length === 0) return [];
+  const basis = [];
+  for (const free of freeCols) {
+    const vec = Array(n).fill(null).map(_ => new Frac(0n,1n));
+    vec[free] = new Frac(1n,1n);
+    // for each pivot row, compute value
+    for (let i = 0; i < pivots.length; i++) {
+      const pc = pivots[i];
+      // find row where pivot is at pc - it's the i-th pivot row in our RREF routine
+      // but we don't have explicit row index mapping; however rref produced leading 1s and zeros elsewhere
+      // We can locate the row by finding the row with 1 at pc
+      let prow = -1;
+      for (let rr = 0; rr < A.length; rr++) {
+        if (!A[rr][pc].isZero() && A[rr][pc].n === 1n && A[rr][pc].d === 1n) { prow = rr; break; }
+      }
+      if (prow === -1) continue;
+      // value is -A[prow][free]
+      vec[pc] = A[prow][free].neg();
+    }
+    basis.push(vec);
+  }
+  return basis;
+}
+
+function fractionVectorToInts(vec) {
+  // vec is array of Frac
+  let lcmDen = 1n;
+  for (const f of vec) lcmDen = bigintLCM(lcmDen, f.d);
+  const ints = vec.map(f => (f.n * (lcmDen / f.d)));
+  // convert to positive integer vector by dividing by gcd
+  let g = 0n;
+  for (const x of ints) g = bigintGCD(g, x < 0n ? -x : x);
+  if (g === 0n) throw new Error('Zero vector in nullspace');
+  const reduced = ints.map(x => x / g);
+  return reduced;
+}
+
+function formatBalanced(left, right, left_coeffs, right_coeffs) {
+  const lhs = left.map((m, i) => `${left_coeffs[i] > 1n ? left_coeffs[i].toString() : ''}${m.trim()}`).join(' + ');
+  const rhs = right.map((m, i) => `${right_coeffs[i] > 1n ? right_coeffs[i].toString() : ''}${m.trim()}`).join(' + ');
+  return `${lhs} -> ${rhs}`;
+}
+
+function allPositive(arr) { return arr.every(x => x > 0n); }
+
+// Main balance function
+function balance_equation(equation) {
+  if (!equation.includes('->')) throw new Error("Equation must contain '->'");
+  const [leftRaw, rightRaw] = equation.split('->').map(s => s.trim());
+  const leftParts = leftRaw.split('+').map(s => s.trim());
+  const rightParts = rightRaw.split('+').map(s => s.trim());
+  const left_moles = parse_side(leftRaw);
+  const right_moles = parse_side(rightRaw);
+  const {M, elements} = buildMatrix(left_moles, right_moles);
+  if (M.length === 0) throw new Error('No elements found');
+  const fracMat = matrixToFrac(M);
+  const basis = nullspace(fracMat);
+  if (basis.length === 0) throw new Error('Cannot balance equation');
+  // choose first basis vector
+  const vec = basis[0];
+  // convert to integers
+  const ints = fractionVectorToInts(vec);
+  // try positive orientation
+  const n_left = leftParts.length;
+  let left_coeffs = ints.slice(0, n_left);
+  let right_coeffs = ints.slice(n_left);
+  if (!allPositive(left_coeffs) || !allPositive(right_coeffs)) {
+    const neg = ints.map(x => -x);
+    const left_n = neg.slice(0, n_left);
+    const right_n = neg.slice(n_left);
+    if (allPositive(left_n) && allPositive(right_n)) {
+      left_coeffs = left_n; right_coeffs = right_n;
+    } else {
+      throw new Error('Cannot balance equation without moving species across the arrow');
+    }
+  }
+  return formatBalanced(leftParts, rightParts, left_coeffs, right_coeffs);
+}
+
+// Hook up UI
+document.getElementById('balanceBtn').addEventListener('click', () => {
+  const eq = document.getElementById('equation').value.trim();
+  const out = document.getElementById('out');
+  const err = document.getElementById('err');
+  err.textContent = '';
+  try {
+    const res = balance_equation(eq);
+    out.textContent = res;
+  } catch (e) {
+    out.textContent = '';
+    err.textContent = 'Error: ' + (e && e.message ? e.message : String(e));
+  }
+});
+
+// balance on load for convenience
+window.addEventListener('load', () => document.getElementById('balanceBtn').click());
+</script>
+</body>
+</html>
