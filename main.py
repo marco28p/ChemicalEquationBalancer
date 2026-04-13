@@ -65,7 +65,6 @@ def parse_side(side):
     return [parse_molecule(m.strip()) for m in molecules]
 
 # balance the chemical equation
-# language: python
 def balance_equation(equation):
     left, right = equation.split("->")
     left_moles = parse_side(left)
