@@ -1,4 +1,3 @@
-# python
 from collections import defaultdict
 from sympy import Matrix, lcm
 
