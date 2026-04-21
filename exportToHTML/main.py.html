@@ -1,0 +1,198 @@
+<html>
+<head>
+<title>main.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cf8e6d;}
+.s1 { color: #bcbec4;}
+.s2 { color: #bcbec4;}
+.s3 { color: #7a7e85;}
+.s4 { color: #6aab73;}
+.s5 { color: #5f826b; font-style: italic;}
+.s6 { color: #2aacb8;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+</center></td></tr></table>
+<pre><span class="s0">from </span><span class="s1">collections </span><span class="s0">import </span><span class="s1">defaultdict</span>
+<span class="s0">from </span><span class="s1">sympy </span><span class="s0">import </span><span class="s1">Matrix</span><span class="s2">, </span><span class="s1">lcm</span>
+
+<span class="s3"># List of chemical element symbols supported for parsing.</span>
+<span class="s3"># This is used to validate parsed element tokens in molecules.</span>
+<span class="s1">ELEMENTS </span><span class="s2">= [</span>
+    <span class="s4">'H'</span><span class="s2">, </span><span class="s4">'He'</span><span class="s2">, </span><span class="s4">'Li'</span><span class="s2">, </span><span class="s4">'Be'</span><span class="s2">, </span><span class="s4">'B'</span><span class="s2">, </span><span class="s4">'C'</span><span class="s2">, </span><span class="s4">'N'</span><span class="s2">, </span><span class="s4">'O'</span><span class="s2">, </span><span class="s4">'F'</span><span class="s2">, </span><span class="s4">'Ne'</span><span class="s2">,</span>
+    <span class="s4">'Na'</span><span class="s2">, </span><span class="s4">'Mg'</span><span class="s2">, </span><span class="s4">'Al'</span><span class="s2">, </span><span class="s4">'Si'</span><span class="s2">, </span><span class="s4">'P'</span><span class="s2">, </span><span class="s4">'S'</span><span class="s2">, </span><span class="s4">'Cl'</span><span class="s2">, </span><span class="s4">'Ar'</span><span class="s2">, </span><span class="s4">'K'</span><span class="s2">, </span><span class="s4">'Ca'</span><span class="s2">,</span>
+    <span class="s4">'Sc'</span><span class="s2">, </span><span class="s4">'Ti'</span><span class="s2">, </span><span class="s4">'V'</span><span class="s2">, </span><span class="s4">'Cr'</span><span class="s2">, </span><span class="s4">'Mn'</span><span class="s2">, </span><span class="s4">'Fe'</span><span class="s2">, </span><span class="s4">'Co'</span><span class="s2">, </span><span class="s4">'Ni'</span><span class="s2">, </span><span class="s4">'Cu'</span><span class="s2">, </span><span class="s4">'Zn'</span><span class="s2">,</span>
+    <span class="s4">'Ga'</span><span class="s2">, </span><span class="s4">'Ge'</span><span class="s2">, </span><span class="s4">'As'</span><span class="s2">, </span><span class="s4">'Se'</span><span class="s2">, </span><span class="s4">'Br'</span><span class="s2">, </span><span class="s4">'Kr'</span><span class="s2">, </span><span class="s4">'Rb'</span><span class="s2">, </span><span class="s4">'Sr'</span><span class="s2">, </span><span class="s4">'Y'</span><span class="s2">, </span><span class="s4">'Zr'</span><span class="s2">,</span>
+    <span class="s4">'Nb'</span><span class="s2">, </span><span class="s4">'Mo'</span><span class="s2">, </span><span class="s4">'Tc'</span><span class="s2">, </span><span class="s4">'Ru'</span><span class="s2">, </span><span class="s4">'Rh'</span><span class="s2">, </span><span class="s4">'Pd'</span><span class="s2">, </span><span class="s4">'Ag'</span><span class="s2">, </span><span class="s4">'Cd'</span><span class="s2">, </span><span class="s4">'In'</span><span class="s2">, </span><span class="s4">'Sn'</span><span class="s2">,</span>
+    <span class="s4">'Sb'</span><span class="s2">, </span><span class="s4">'Te'</span><span class="s2">, </span><span class="s4">'I'</span><span class="s2">, </span><span class="s4">'Xe'</span><span class="s2">, </span><span class="s4">'Cs'</span><span class="s2">, </span><span class="s4">'Ba'</span><span class="s2">, </span><span class="s4">'La'</span><span class="s2">, </span><span class="s4">'Ce'</span><span class="s2">, </span><span class="s4">'Pr'</span><span class="s2">, </span><span class="s4">'Nd'</span><span class="s2">,</span>
+    <span class="s4">'Pm'</span><span class="s2">, </span><span class="s4">'Sm'</span><span class="s2">, </span><span class="s4">'Eu'</span><span class="s2">, </span><span class="s4">'Gd'</span><span class="s2">, </span><span class="s4">'Tb'</span><span class="s2">, </span><span class="s4">'Dy'</span><span class="s2">, </span><span class="s4">'Ho'</span><span class="s2">, </span><span class="s4">'Er'</span><span class="s2">, </span><span class="s4">'Tm'</span><span class="s2">, </span><span class="s4">'Yb'</span><span class="s2">,</span>
+    <span class="s4">'Lu'</span><span class="s2">, </span><span class="s4">'Hf'</span><span class="s2">, </span><span class="s4">'Ta'</span><span class="s2">, </span><span class="s4">'W'</span><span class="s2">, </span><span class="s4">'Re'</span><span class="s2">, </span><span class="s4">'Os'</span><span class="s2">, </span><span class="s4">'Ir'</span><span class="s2">, </span><span class="s4">'Pt'</span><span class="s2">, </span><span class="s4">'Au'</span><span class="s2">, </span><span class="s4">'Hg'</span><span class="s2">,</span>
+    <span class="s4">'Tl'</span><span class="s2">, </span><span class="s4">'Pb'</span><span class="s2">, </span><span class="s4">'Bi'</span><span class="s2">, </span><span class="s4">'Po'</span><span class="s2">, </span><span class="s4">'At'</span><span class="s2">, </span><span class="s4">'Rn'</span><span class="s2">, </span><span class="s4">'Fr'</span><span class="s2">, </span><span class="s4">'Ra'</span><span class="s2">, </span><span class="s4">'Ac'</span><span class="s2">, </span><span class="s4">'Th'</span><span class="s2">,</span>
+    <span class="s4">'Pa'</span><span class="s2">, </span><span class="s4">'U'</span><span class="s2">, </span><span class="s4">'Np'</span><span class="s2">, </span><span class="s4">'Pu'</span><span class="s2">, </span><span class="s4">'Am'</span><span class="s2">, </span><span class="s4">'Cm'</span><span class="s2">, </span><span class="s4">'Bk'</span><span class="s2">, </span><span class="s4">'Cf'</span><span class="s2">, </span><span class="s4">'Es'</span><span class="s2">, </span><span class="s4">'Fm'</span><span class="s2">,</span>
+    <span class="s4">'Md'</span><span class="s2">, </span><span class="s4">'No'</span><span class="s2">, </span><span class="s4">'Lr'</span><span class="s2">, </span><span class="s4">'Rf'</span><span class="s2">, </span><span class="s4">'Db'</span><span class="s2">, </span><span class="s4">'Sg'</span><span class="s2">, </span><span class="s4">'Bh'</span><span class="s2">, </span><span class="s4">'Hs'</span><span class="s2">, </span><span class="s4">'Mt'</span><span class="s2">, </span><span class="s4">'Ds'</span><span class="s2">,</span>
+    <span class="s4">'Rg'</span><span class="s2">, </span><span class="s4">'Cn'</span><span class="s2">, </span><span class="s4">'Fl'</span><span class="s2">, </span><span class="s4">'Lv'</span><span class="s2">, </span><span class="s4">'Ts'</span><span class="s2">, </span><span class="s4">'Og'</span>
+<span class="s2">]</span>
+
+<span class="s3"># parse molecule</span>
+<span class="s0">def </span><span class="s1">parse_molecule</span><span class="s2">(</span><span class="s1">molecule</span><span class="s2">):</span>
+    <span class="s5">&quot;&quot;&quot; 
+    Parse a molecule formula like &quot;Ca(OH)2&quot; into a dict of element -&gt; count. 
+    Supports nested parenthesis groups and numeric multipliers. 
+    Raises ValueError if an unknown element symbol is encountered. 
+    &quot;&quot;&quot;</span>
+
+    <span class="s3"># stack holds previous element_count dicts when entering parenthesis groups</span>
+    <span class="s1">stack </span><span class="s2">= []</span>
+    <span class="s1">element_count </span><span class="s2">= </span><span class="s1">defaultdict</span><span class="s2">(</span><span class="s1">int</span><span class="s2">)</span>
+    <span class="s1">i </span><span class="s2">= </span><span class="s6">0</span>
+    <span class="s0">while </span><span class="s1">i </span><span class="s2">&lt; </span><span class="s1">len</span><span class="s2">(</span><span class="s1">molecule</span><span class="s2">):</span>
+        <span class="s0">if </span><span class="s1">molecule</span><span class="s2">[</span><span class="s1">i</span><span class="s2">] == </span><span class="s4">&quot;(&quot;</span><span class="s2">:</span>
+            <span class="s3"># push current counts and start a fresh group</span>
+            <span class="s1">stack</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(</span><span class="s1">element_count</span><span class="s2">)</span>
+            <span class="s1">element_count </span><span class="s2">= </span><span class="s1">defaultdict</span><span class="s2">(</span><span class="s1">int</span><span class="s2">)</span>
+            <span class="s1">i </span><span class="s2">+= </span><span class="s6">1</span>
+        <span class="s0">elif </span><span class="s1">molecule</span><span class="s2">[</span><span class="s1">i</span><span class="s2">] == </span><span class="s4">&quot;)&quot;</span><span class="s2">:</span>
+            <span class="s3"># end of group: read multiplier digits (if any) and apply to group</span>
+            <span class="s1">i </span><span class="s2">+= </span><span class="s6">1</span>
+            <span class="s1">num </span><span class="s2">= </span><span class="s4">&quot;&quot;</span>
+            <span class="s0">while </span><span class="s1">i </span><span class="s2">&lt; </span><span class="s1">len</span><span class="s2">(</span><span class="s1">molecule</span><span class="s2">) </span><span class="s0">and </span><span class="s1">molecule</span><span class="s2">[</span><span class="s1">i</span><span class="s2">].</span><span class="s1">isdigit</span><span class="s2">():</span>
+                <span class="s1">num </span><span class="s2">+= </span><span class="s1">molecule</span><span class="s2">[</span><span class="s1">i</span><span class="s2">]</span>
+                <span class="s1">i </span><span class="s2">+= </span><span class="s6">1</span>
+            <span class="s1">factor </span><span class="s2">= </span><span class="s1">int</span><span class="s2">(</span><span class="s1">num</span><span class="s2">) </span><span class="s0">if </span><span class="s1">num </span><span class="s0">else </span><span class="s6">1</span>
+            <span class="s1">prev </span><span class="s2">= </span><span class="s1">stack</span><span class="s2">.</span><span class="s1">pop</span><span class="s2">()</span>
+            <span class="s3"># multiply current group counts by factor and merge back into previous</span>
+            <span class="s0">for </span><span class="s1">k</span><span class="s2">, </span><span class="s1">v </span><span class="s0">in </span><span class="s1">element_count</span><span class="s2">.</span><span class="s1">items</span><span class="s2">():</span>
+                <span class="s1">prev</span><span class="s2">[</span><span class="s1">k</span><span class="s2">] += </span><span class="s1">v </span><span class="s2">* </span><span class="s1">factor</span>
+            <span class="s1">element_count </span><span class="s2">= </span><span class="s1">prev</span>
+        <span class="s0">else</span><span class="s2">:</span>
+            <span class="s3"># parse an element symbol (one uppercase optionally followed by lowercase)</span>
+            <span class="s0">if </span><span class="s1">i</span><span class="s2">+</span><span class="s6">1 </span><span class="s2">&lt; </span><span class="s1">len</span><span class="s2">(</span><span class="s1">molecule</span><span class="s2">) </span><span class="s0">and </span><span class="s1">molecule</span><span class="s2">[</span><span class="s1">i</span><span class="s2">+</span><span class="s6">1</span><span class="s2">].</span><span class="s1">islower</span><span class="s2">():</span>
+                <span class="s1">elem </span><span class="s2">= </span><span class="s1">molecule</span><span class="s2">[</span><span class="s1">i</span><span class="s2">:</span><span class="s1">i</span><span class="s2">+</span><span class="s6">2</span><span class="s2">]</span>
+                <span class="s1">i </span><span class="s2">+= </span><span class="s6">2</span>
+            <span class="s0">else</span><span class="s2">:</span>
+                <span class="s1">elem </span><span class="s2">= </span><span class="s1">molecule</span><span class="s2">[</span><span class="s1">i</span><span class="s2">]</span>
+                <span class="s1">i </span><span class="s2">+= </span><span class="s6">1</span>
+            <span class="s3"># validate symbol exists in ELEMENTS list</span>
+            <span class="s0">if </span><span class="s1">elem </span><span class="s0">not in </span><span class="s1">ELEMENTS</span><span class="s2">:</span>
+                <span class="s0">raise </span><span class="s1">ValueError</span><span class="s2">(</span><span class="s4">f&quot;Unknown element: </span><span class="s0">{</span><span class="s1">elem</span><span class="s0">}</span><span class="s4">&quot;</span><span class="s2">)</span>
+            <span class="s3"># parse numeric subscript after the element (if any)</span>
+            <span class="s1">num </span><span class="s2">= </span><span class="s4">&quot;&quot;</span>
+            <span class="s0">while </span><span class="s1">i </span><span class="s2">&lt; </span><span class="s1">len</span><span class="s2">(</span><span class="s1">molecule</span><span class="s2">) </span><span class="s0">and </span><span class="s1">molecule</span><span class="s2">[</span><span class="s1">i</span><span class="s2">].</span><span class="s1">isdigit</span><span class="s2">():</span>
+                <span class="s1">num </span><span class="s2">+= </span><span class="s1">molecule</span><span class="s2">[</span><span class="s1">i</span><span class="s2">]</span>
+                <span class="s1">i </span><span class="s2">+= </span><span class="s6">1</span>
+            <span class="s1">element_count</span><span class="s2">[</span><span class="s1">elem</span><span class="s2">] += </span><span class="s1">int</span><span class="s2">(</span><span class="s1">num</span><span class="s2">) </span><span class="s0">if </span><span class="s1">num </span><span class="s0">else </span><span class="s6">1</span>
+    <span class="s3"># return a plain dict for easier downstream use</span>
+    <span class="s0">return </span><span class="s1">dict</span><span class="s2">(</span><span class="s1">element_count</span><span class="s2">)</span>
+
+<span class="s3"># parse each side of the equation</span>
+<span class="s0">def </span><span class="s1">parse_side</span><span class="s2">(</span><span class="s1">side</span><span class="s2">):</span>
+    <span class="s5">&quot;&quot;&quot; 
+    Split a side string like &quot;H2 + O2&quot; into a list of molecule dictionaries. 
+    Strips whitespace around each molecule and parses each formula. 
+    &quot;&quot;&quot;</span>
+    <span class="s3"># Split on '+' and parse each molecule</span>
+    <span class="s1">molecules </span><span class="s2">= </span><span class="s1">side</span><span class="s2">.</span><span class="s1">split</span><span class="s2">(</span><span class="s4">&quot;+&quot;</span><span class="s2">)</span>
+    <span class="s0">return </span><span class="s2">[</span><span class="s1">parse_molecule</span><span class="s2">(</span><span class="s1">m</span><span class="s2">.</span><span class="s1">strip</span><span class="s2">()) </span><span class="s0">for </span><span class="s1">m </span><span class="s0">in </span><span class="s1">molecules</span><span class="s2">]</span>
+
+<span class="s3"># balance the chemical equation</span>
+<span class="s0">def </span><span class="s1">balance_equation</span><span class="s2">(</span><span class="s1">equation</span><span class="s2">):</span>
+    <span class="s5">&quot;&quot;&quot; 
+    Balance a chemical equation given as 'A + B -&gt; C + D'. 
+    Returns a balanced equation string with integer coefficients. 
+    &quot;&quot;&quot;</span>
+
+    <span class="s3"># split left and right sides around the arrow</span>
+    <span class="s1">left</span><span class="s2">, </span><span class="s1">right </span><span class="s2">= </span><span class="s1">equation</span><span class="s2">.</span><span class="s1">split</span><span class="s2">(</span><span class="s4">&quot;-&gt;&quot;</span><span class="s2">)</span>
+    <span class="s1">left_moles </span><span class="s2">= </span><span class="s1">parse_side</span><span class="s2">(</span><span class="s1">left</span><span class="s2">)</span>
+    <span class="s1">right_moles </span><span class="s2">= </span><span class="s1">parse_side</span><span class="s2">(</span><span class="s1">right</span><span class="s2">)</span>
+
+    <span class="s3"># collect the set of all element symbols present in the equation</span>
+    <span class="s1">elements </span><span class="s2">= </span><span class="s1">set</span><span class="s2">()</span>
+    <span class="s0">for </span><span class="s1">m </span><span class="s0">in </span><span class="s1">left_moles </span><span class="s2">+ </span><span class="s1">right_moles</span><span class="s2">:</span>
+        <span class="s1">elements</span><span class="s2">.</span><span class="s1">update</span><span class="s2">(</span><span class="s1">m</span><span class="s2">.</span><span class="s1">keys</span><span class="s2">())</span>
+    <span class="s1">elements </span><span class="s2">= </span><span class="s1">sorted</span><span class="s2">(</span><span class="s1">elements</span><span class="s2">)</span>
+
+    <span class="s3"># build the stoichiometry matrix:</span>
+    <span class="s3"># For each element (row), each reactant's coefficient is positive,</span>
+    <span class="s3"># each product's coefficient is negative. The nullspace of this matrix</span>
+    <span class="s3"># gives the relative coefficients that balance all elements.</span>
+    <span class="s1">matrix </span><span class="s2">= []</span>
+    <span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">elements</span><span class="s2">:</span>
+        <span class="s1">row </span><span class="s2">= []</span>
+        <span class="s0">for </span><span class="s1">m </span><span class="s0">in </span><span class="s1">left_moles</span><span class="s2">:</span>
+            <span class="s1">row</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(</span><span class="s1">m</span><span class="s2">.</span><span class="s1">get</span><span class="s2">(</span><span class="s1">i</span><span class="s2">, </span><span class="s6">0</span><span class="s2">))</span>
+        <span class="s0">for </span><span class="s1">m </span><span class="s0">in </span><span class="s1">right_moles</span><span class="s2">:</span>
+            <span class="s1">row</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(-</span><span class="s1">m</span><span class="s2">.</span><span class="s1">get</span><span class="s2">(</span><span class="s1">i</span><span class="s2">, </span><span class="s6">0</span><span class="s2">))</span>
+        <span class="s1">matrix</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(</span><span class="s1">row</span><span class="s2">)</span>
+
+    <span class="s1">matrix </span><span class="s2">= </span><span class="s1">Matrix</span><span class="s2">(</span><span class="s1">matrix</span><span class="s2">)</span>
+    <span class="s3"># compute nullspace (a basis of solutions). We expect at least one vector.</span>
+    <span class="s1">solution </span><span class="s2">= </span><span class="s1">matrix</span><span class="s2">.</span><span class="s1">nullspace</span><span class="s2">()</span>
+    <span class="s0">if not </span><span class="s1">solution</span><span class="s2">:</span>
+        <span class="s0">raise </span><span class="s1">ValueError</span><span class="s2">(</span><span class="s4">&quot;Cannot balance equation&quot;</span><span class="s2">)</span>
+
+    <span class="s1">coefficients </span><span class="s2">= </span><span class="s1">solution</span><span class="s2">[</span><span class="s6">0</span><span class="s2">]</span>
+    <span class="s3"># coefficients are rational; scale to integers by lcm of denominators</span>
+    <span class="s1">lcm_val </span><span class="s2">= </span><span class="s1">lcm</span><span class="s2">([</span><span class="s1">r</span><span class="s2">.</span><span class="s1">q </span><span class="s0">for </span><span class="s1">r </span><span class="s0">in </span><span class="s1">coefficients</span><span class="s2">])</span>
+    <span class="s1">coeffs </span><span class="s2">= [</span><span class="s1">int</span><span class="s2">(</span><span class="s1">r </span><span class="s2">* </span><span class="s1">lcm_val</span><span class="s2">) </span><span class="s0">for </span><span class="s1">r </span><span class="s0">in </span><span class="s1">coefficients</span><span class="s2">]</span>
+
+    <span class="s3"># normalize by gcd to get smallest integer ratio.</span>
+    <span class="s3"># simple gcd implementation to avoid extra imports</span>
+    <span class="s0">def </span><span class="s1">_gcd</span><span class="s2">(</span><span class="s1">a</span><span class="s2">, </span><span class="s1">b</span><span class="s2">):</span>
+        <span class="s1">a</span><span class="s2">, </span><span class="s1">b </span><span class="s2">= </span><span class="s1">abs</span><span class="s2">(</span><span class="s1">a</span><span class="s2">), </span><span class="s1">abs</span><span class="s2">(</span><span class="s1">b</span><span class="s2">)</span>
+        <span class="s0">while </span><span class="s1">b</span><span class="s2">:</span>
+            <span class="s1">a</span><span class="s2">, </span><span class="s1">b </span><span class="s2">= </span><span class="s1">b</span><span class="s2">, </span><span class="s1">a </span><span class="s2">% </span><span class="s1">b</span>
+        <span class="s0">return </span><span class="s1">a</span>
+
+    <span class="s1">g </span><span class="s2">= </span><span class="s6">0</span>
+    <span class="s0">for </span><span class="s1">x </span><span class="s0">in </span><span class="s1">coeffs</span><span class="s2">:</span>
+        <span class="s1">g </span><span class="s2">= </span><span class="s1">_gcd</span><span class="s2">(</span><span class="s1">g</span><span class="s2">, </span><span class="s1">x</span><span class="s2">)</span>
+    <span class="s0">if </span><span class="s1">g </span><span class="s2">&gt; </span><span class="s6">1</span><span class="s2">:</span>
+        <span class="s1">coeffs </span><span class="s2">= [</span><span class="s1">x </span><span class="s2">// </span><span class="s1">g </span><span class="s0">for </span><span class="s1">x </span><span class="s0">in </span><span class="s1">coeffs</span><span class="s2">]</span>
+
+    <span class="s1">n_left </span><span class="s2">= </span><span class="s1">len</span><span class="s2">(</span><span class="s1">left_moles</span><span class="s2">)</span>
+    <span class="s1">left_coeffs </span><span class="s2">= </span><span class="s1">coeffs</span><span class="s2">[:</span><span class="s1">n_left</span><span class="s2">]</span>
+    <span class="s1">right_coeffs </span><span class="s2">= </span><span class="s1">coeffs</span><span class="s2">[</span><span class="s1">n_left</span><span class="s2">:]</span>
+
+    <span class="s0">def </span><span class="s1">all_positive</span><span class="s2">(</span><span class="s1">lst</span><span class="s2">):</span>
+        <span class="s3"># require all coefficients to be strictly positive</span>
+        <span class="s0">return </span><span class="s1">all</span><span class="s2">(</span><span class="s1">x </span><span class="s2">&gt; </span><span class="s6">0 </span><span class="s0">for </span><span class="s1">x </span><span class="s0">in </span><span class="s1">lst</span><span class="s2">)</span>
+
+    <span class="s3"># If signs are all negative, flip the entire vector; otherwise error.</span>
+    <span class="s3"># This avoids moving species across the arrow.</span>
+    <span class="s0">if not </span><span class="s2">(</span><span class="s1">all_positive</span><span class="s2">(</span><span class="s1">left_coeffs</span><span class="s2">) </span><span class="s0">and </span><span class="s1">all_positive</span><span class="s2">(</span><span class="s1">right_coeffs</span><span class="s2">)):</span>
+        <span class="s1">neg </span><span class="s2">= [-</span><span class="s1">x </span><span class="s0">for </span><span class="s1">x </span><span class="s0">in </span><span class="s1">coeffs</span><span class="s2">]</span>
+        <span class="s1">left_n </span><span class="s2">= </span><span class="s1">neg</span><span class="s2">[:</span><span class="s1">n_left</span><span class="s2">]</span>
+        <span class="s1">right_n </span><span class="s2">= </span><span class="s1">neg</span><span class="s2">[</span><span class="s1">n_left</span><span class="s2">:]</span>
+        <span class="s0">if </span><span class="s1">all_positive</span><span class="s2">(</span><span class="s1">left_n</span><span class="s2">) </span><span class="s0">and </span><span class="s1">all_positive</span><span class="s2">(</span><span class="s1">right_n</span><span class="s2">):</span>
+            <span class="s1">coeffs </span><span class="s2">= </span><span class="s1">neg</span>
+            <span class="s1">left_coeffs </span><span class="s2">= </span><span class="s1">left_n</span>
+            <span class="s1">right_coeffs </span><span class="s2">= </span><span class="s1">right_n</span>
+        <span class="s0">else</span><span class="s2">:</span>
+            <span class="s0">raise </span><span class="s1">ValueError</span><span class="s2">(</span><span class="s4">&quot;Cannot balance equation without moving species across the arrow&quot;</span><span class="s2">)</span>
+
+    <span class="s3"># Build the output strings.</span>
+    <span class="s3"># Note: left.split(&quot;+&quot;) and right.split(&quot;+&quot;) reuse the original ordering of molecules.</span>
+    <span class="s1">left_str </span><span class="s2">= </span><span class="s4">&quot; + &quot;</span><span class="s2">.</span><span class="s1">join</span><span class="s2">(</span><span class="s4">f&quot;</span><span class="s0">{</span><span class="s1">c </span><span class="s0">if </span><span class="s1">c</span><span class="s2">&gt;</span><span class="s6">1 </span><span class="s0">else </span><span class="s4">''</span><span class="s0">}{</span><span class="s1">m</span><span class="s0">}</span><span class="s4">&quot; </span><span class="s0">for </span><span class="s1">c</span><span class="s2">, </span><span class="s1">m </span><span class="s0">in </span><span class="s1">zip</span><span class="s2">(</span><span class="s1">left_coeffs</span><span class="s2">, </span><span class="s1">left</span><span class="s2">.</span><span class="s1">split</span><span class="s2">(</span><span class="s4">&quot;+&quot;</span><span class="s2">)))</span>
+    <span class="s1">right_str </span><span class="s2">= </span><span class="s4">&quot; + &quot;</span><span class="s2">.</span><span class="s1">join</span><span class="s2">(</span><span class="s4">f&quot;</span><span class="s0">{</span><span class="s1">c </span><span class="s0">if </span><span class="s1">c</span><span class="s2">&gt;</span><span class="s6">1 </span><span class="s0">else </span><span class="s4">''</span><span class="s0">}{</span><span class="s1">m</span><span class="s0">}</span><span class="s4">&quot; </span><span class="s0">for </span><span class="s1">c</span><span class="s2">, </span><span class="s1">m </span><span class="s0">in </span><span class="s1">zip</span><span class="s2">(</span><span class="s1">right_coeffs</span><span class="s2">, </span><span class="s1">right</span><span class="s2">.</span><span class="s1">split</span><span class="s2">(</span><span class="s4">&quot;+&quot;</span><span class="s2">)))</span>
+
+    <span class="s0">return </span><span class="s4">f&quot;</span><span class="s0">{</span><span class="s1">left_str</span><span class="s0">} </span><span class="s4">-&gt; </span><span class="s0">{</span><span class="s1">right_str</span><span class="s0">}</span><span class="s4">&quot;</span>
+
+
+<span class="s3"># main loop</span>
+<span class="s1">print</span><span class="s2">(</span><span class="s4">&quot;Enter a chemical equation using '-&gt;'. Example: H2 + O2 -&gt; H2O&quot;</span><span class="s2">)</span>
+<span class="s1">equation </span><span class="s2">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">&quot;Equation: &quot;</span><span class="s2">)</span>
+
+<span class="s0">try</span><span class="s2">:</span>
+    <span class="s1">balanced </span><span class="s2">= </span><span class="s1">balance_equation</span><span class="s2">(</span><span class="s1">equation</span><span class="s2">)</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">&quot;Balanced equation: &quot;</span><span class="s2">)</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s1">balanced</span><span class="s2">)</span>
+<span class="s0">except </span><span class="s1">Exception </span><span class="s0">as </span><span class="s1">e</span><span class="s2">:</span>
+    <span class="s3"># Report parsing/balancing errors back to the user</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">&quot;Error:&quot;</span><span class="s2">, </span><span class="s1">e</span><span class="s2">)</span>
+</pre>
+</body>
+</html>
