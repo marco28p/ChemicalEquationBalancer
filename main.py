@@ -26,7 +26,7 @@ def parse_molecule(molecule):
     Raises ValueError if an unknown element symbol is encountered.
     """
 
-    # stack holds previous element_count dicts when entering parenthesis groups
+    # stack holds previous element_count dicts when entering parenthesis groups to keep track of nesting
     stack = []
     element_count = defaultdict(int)
     i = 0
