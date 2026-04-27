@@ -1,0 +1,154 @@
+<html>
+<head>
+<title>mainWithoutComments.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cf8e6d;}
+.s1 { color: #bcbec4;}
+.s2 { color: #bcbec4;}
+.s3 { color: #6aab73;}
+.s4 { color: #2aacb8;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+mainWithoutComments.py</font>
+</center></td></tr></table>
+<pre><span class="s0">from </span><span class="s1">collections </span><span class="s0">import </span><span class="s1">defaultdict</span>
+<span class="s0">from </span><span class="s1">sympy </span><span class="s0">import </span><span class="s1">Matrix</span><span class="s2">, </span><span class="s1">lcm</span>
+
+<span class="s1">ELEMENTS </span><span class="s2">= [</span>
+    <span class="s3">'H'</span><span class="s2">, </span><span class="s3">'He'</span><span class="s2">, </span><span class="s3">'Li'</span><span class="s2">, </span><span class="s3">'Be'</span><span class="s2">, </span><span class="s3">'B'</span><span class="s2">, </span><span class="s3">'C'</span><span class="s2">, </span><span class="s3">'N'</span><span class="s2">, </span><span class="s3">'O'</span><span class="s2">, </span><span class="s3">'F'</span><span class="s2">, </span><span class="s3">'Ne'</span><span class="s2">,</span>
+    <span class="s3">'Na'</span><span class="s2">, </span><span class="s3">'Mg'</span><span class="s2">, </span><span class="s3">'Al'</span><span class="s2">, </span><span class="s3">'Si'</span><span class="s2">, </span><span class="s3">'P'</span><span class="s2">, </span><span class="s3">'S'</span><span class="s2">, </span><span class="s3">'Cl'</span><span class="s2">, </span><span class="s3">'Ar'</span><span class="s2">, </span><span class="s3">'K'</span><span class="s2">, </span><span class="s3">'Ca'</span><span class="s2">,</span>
+    <span class="s3">'Sc'</span><span class="s2">, </span><span class="s3">'Ti'</span><span class="s2">, </span><span class="s3">'V'</span><span class="s2">, </span><span class="s3">'Cr'</span><span class="s2">, </span><span class="s3">'Mn'</span><span class="s2">, </span><span class="s3">'Fe'</span><span class="s2">, </span><span class="s3">'Co'</span><span class="s2">, </span><span class="s3">'Ni'</span><span class="s2">, </span><span class="s3">'Cu'</span><span class="s2">, </span><span class="s3">'Zn'</span><span class="s2">,</span>
+    <span class="s3">'Ga'</span><span class="s2">, </span><span class="s3">'Ge'</span><span class="s2">, </span><span class="s3">'As'</span><span class="s2">, </span><span class="s3">'Se'</span><span class="s2">, </span><span class="s3">'Br'</span><span class="s2">, </span><span class="s3">'Kr'</span><span class="s2">, </span><span class="s3">'Rb'</span><span class="s2">, </span><span class="s3">'Sr'</span><span class="s2">, </span><span class="s3">'Y'</span><span class="s2">, </span><span class="s3">'Zr'</span><span class="s2">,</span>
+    <span class="s3">'Nb'</span><span class="s2">, </span><span class="s3">'Mo'</span><span class="s2">, </span><span class="s3">'Tc'</span><span class="s2">, </span><span class="s3">'Ru'</span><span class="s2">, </span><span class="s3">'Rh'</span><span class="s2">, </span><span class="s3">'Pd'</span><span class="s2">, </span><span class="s3">'Ag'</span><span class="s2">, </span><span class="s3">'Cd'</span><span class="s2">, </span><span class="s3">'In'</span><span class="s2">, </span><span class="s3">'Sn'</span><span class="s2">,</span>
+    <span class="s3">'Sb'</span><span class="s2">, </span><span class="s3">'Te'</span><span class="s2">, </span><span class="s3">'I'</span><span class="s2">, </span><span class="s3">'Xe'</span><span class="s2">, </span><span class="s3">'Cs'</span><span class="s2">, </span><span class="s3">'Ba'</span><span class="s2">, </span><span class="s3">'La'</span><span class="s2">, </span><span class="s3">'Ce'</span><span class="s2">, </span><span class="s3">'Pr'</span><span class="s2">, </span><span class="s3">'Nd'</span><span class="s2">,</span>
+    <span class="s3">'Pm'</span><span class="s2">, </span><span class="s3">'Sm'</span><span class="s2">, </span><span class="s3">'Eu'</span><span class="s2">, </span><span class="s3">'Gd'</span><span class="s2">, </span><span class="s3">'Tb'</span><span class="s2">, </span><span class="s3">'Dy'</span><span class="s2">, </span><span class="s3">'Ho'</span><span class="s2">, </span><span class="s3">'Er'</span><span class="s2">, </span><span class="s3">'Tm'</span><span class="s2">, </span><span class="s3">'Yb'</span><span class="s2">,</span>
+    <span class="s3">'Lu'</span><span class="s2">, </span><span class="s3">'Hf'</span><span class="s2">, </span><span class="s3">'Ta'</span><span class="s2">, </span><span class="s3">'W'</span><span class="s2">, </span><span class="s3">'Re'</span><span class="s2">, </span><span class="s3">'Os'</span><span class="s2">, </span><span class="s3">'Ir'</span><span class="s2">, </span><span class="s3">'Pt'</span><span class="s2">, </span><span class="s3">'Au'</span><span class="s2">, </span><span class="s3">'Hg'</span><span class="s2">,</span>
+    <span class="s3">'Tl'</span><span class="s2">, </span><span class="s3">'Pb'</span><span class="s2">, </span><span class="s3">'Bi'</span><span class="s2">, </span><span class="s3">'Po'</span><span class="s2">, </span><span class="s3">'At'</span><span class="s2">, </span><span class="s3">'Rn'</span><span class="s2">, </span><span class="s3">'Fr'</span><span class="s2">, </span><span class="s3">'Ra'</span><span class="s2">, </span><span class="s3">'Ac'</span><span class="s2">, </span><span class="s3">'Th'</span><span class="s2">,</span>
+    <span class="s3">'Pa'</span><span class="s2">, </span><span class="s3">'U'</span><span class="s2">, </span><span class="s3">'Np'</span><span class="s2">, </span><span class="s3">'Pu'</span><span class="s2">, </span><span class="s3">'Am'</span><span class="s2">, </span><span class="s3">'Cm'</span><span class="s2">, </span><span class="s3">'Bk'</span><span class="s2">, </span><span class="s3">'Cf'</span><span class="s2">, </span><span class="s3">'Es'</span><span class="s2">, </span><span class="s3">'Fm'</span><span class="s2">,</span>
+    <span class="s3">'Md'</span><span class="s2">, </span><span class="s3">'No'</span><span class="s2">, </span><span class="s3">'Lr'</span><span class="s2">, </span><span class="s3">'Rf'</span><span class="s2">, </span><span class="s3">'Db'</span><span class="s2">, </span><span class="s3">'Sg'</span><span class="s2">, </span><span class="s3">'Bh'</span><span class="s2">, </span><span class="s3">'Hs'</span><span class="s2">, </span><span class="s3">'Mt'</span><span class="s2">, </span><span class="s3">'Ds'</span><span class="s2">,</span>
+    <span class="s3">'Rg'</span><span class="s2">, </span><span class="s3">'Cn'</span><span class="s2">, </span><span class="s3">'Fl'</span><span class="s2">, </span><span class="s3">'Lv'</span><span class="s2">, </span><span class="s3">'Ts'</span><span class="s2">, </span><span class="s3">'Og'</span>
+<span class="s2">]</span>
+
+<span class="s0">def </span><span class="s1">parse_molecule</span><span class="s2">(</span><span class="s1">molecule</span><span class="s2">):</span>
+
+    <span class="s1">stack </span><span class="s2">= []</span>
+    <span class="s1">element_count </span><span class="s2">= </span><span class="s1">defaultdict</span><span class="s2">(</span><span class="s1">int</span><span class="s2">)</span>
+    <span class="s1">i </span><span class="s2">= </span><span class="s4">0</span>
+    <span class="s0">while </span><span class="s1">i </span><span class="s2">&lt; </span><span class="s1">len</span><span class="s2">(</span><span class="s1">molecule</span><span class="s2">):</span>
+        <span class="s0">if </span><span class="s1">molecule</span><span class="s2">[</span><span class="s1">i</span><span class="s2">] == </span><span class="s3">&quot;(&quot;</span><span class="s2">:</span>
+            <span class="s1">stack</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(</span><span class="s1">element_count</span><span class="s2">)</span>
+            <span class="s1">element_count </span><span class="s2">= </span><span class="s1">defaultdict</span><span class="s2">(</span><span class="s1">int</span><span class="s2">)</span>
+            <span class="s1">i </span><span class="s2">+= </span><span class="s4">1</span>
+        <span class="s0">elif </span><span class="s1">molecule</span><span class="s2">[</span><span class="s1">i</span><span class="s2">] == </span><span class="s3">&quot;)&quot;</span><span class="s2">:</span>
+            <span class="s1">i </span><span class="s2">+= </span><span class="s4">1</span>
+            <span class="s1">num </span><span class="s2">= </span><span class="s3">&quot;&quot;</span>
+            <span class="s0">while </span><span class="s1">i </span><span class="s2">&lt; </span><span class="s1">len</span><span class="s2">(</span><span class="s1">molecule</span><span class="s2">) </span><span class="s0">and </span><span class="s1">molecule</span><span class="s2">[</span><span class="s1">i</span><span class="s2">].</span><span class="s1">isdigit</span><span class="s2">():</span>
+                <span class="s1">num </span><span class="s2">+= </span><span class="s1">molecule</span><span class="s2">[</span><span class="s1">i</span><span class="s2">]</span>
+                <span class="s1">i </span><span class="s2">+= </span><span class="s4">1</span>
+            <span class="s1">factor </span><span class="s2">= </span><span class="s1">int</span><span class="s2">(</span><span class="s1">num</span><span class="s2">) </span><span class="s0">if </span><span class="s1">num </span><span class="s0">else </span><span class="s4">1</span>
+            <span class="s1">prev </span><span class="s2">= </span><span class="s1">stack</span><span class="s2">.</span><span class="s1">pop</span><span class="s2">()</span>
+            <span class="s0">for </span><span class="s1">k</span><span class="s2">, </span><span class="s1">v </span><span class="s0">in </span><span class="s1">element_count</span><span class="s2">.</span><span class="s1">items</span><span class="s2">():</span>
+                <span class="s1">prev</span><span class="s2">[</span><span class="s1">k</span><span class="s2">] += </span><span class="s1">v </span><span class="s2">* </span><span class="s1">factor</span>
+            <span class="s1">element_count </span><span class="s2">= </span><span class="s1">prev</span>
+        <span class="s0">else</span><span class="s2">:</span>
+            <span class="s0">if </span><span class="s1">i</span><span class="s2">+</span><span class="s4">1 </span><span class="s2">&lt; </span><span class="s1">len</span><span class="s2">(</span><span class="s1">molecule</span><span class="s2">) </span><span class="s0">and </span><span class="s1">molecule</span><span class="s2">[</span><span class="s1">i</span><span class="s2">+</span><span class="s4">1</span><span class="s2">].</span><span class="s1">islower</span><span class="s2">():</span>
+                <span class="s1">elem </span><span class="s2">= </span><span class="s1">molecule</span><span class="s2">[</span><span class="s1">i</span><span class="s2">:</span><span class="s1">i</span><span class="s2">+</span><span class="s4">2</span><span class="s2">]</span>
+                <span class="s1">i </span><span class="s2">+= </span><span class="s4">2</span>
+            <span class="s0">else</span><span class="s2">:</span>
+                <span class="s1">elem </span><span class="s2">= </span><span class="s1">molecule</span><span class="s2">[</span><span class="s1">i</span><span class="s2">]</span>
+                <span class="s1">i </span><span class="s2">+= </span><span class="s4">1</span>
+            <span class="s0">if </span><span class="s1">elem </span><span class="s0">not in </span><span class="s1">ELEMENTS</span><span class="s2">:</span>
+                <span class="s0">raise </span><span class="s1">ValueError</span><span class="s2">(</span><span class="s3">f&quot;Unknown element: </span><span class="s0">{</span><span class="s1">elem</span><span class="s0">}</span><span class="s3">&quot;</span><span class="s2">)</span>
+            <span class="s1">num </span><span class="s2">= </span><span class="s3">&quot;&quot;</span>
+            <span class="s0">while </span><span class="s1">i </span><span class="s2">&lt; </span><span class="s1">len</span><span class="s2">(</span><span class="s1">molecule</span><span class="s2">) </span><span class="s0">and </span><span class="s1">molecule</span><span class="s2">[</span><span class="s1">i</span><span class="s2">].</span><span class="s1">isdigit</span><span class="s2">():</span>
+                <span class="s1">num </span><span class="s2">+= </span><span class="s1">molecule</span><span class="s2">[</span><span class="s1">i</span><span class="s2">]</span>
+                <span class="s1">i </span><span class="s2">+= </span><span class="s4">1</span>
+            <span class="s1">element_count</span><span class="s2">[</span><span class="s1">elem</span><span class="s2">] += </span><span class="s1">int</span><span class="s2">(</span><span class="s1">num</span><span class="s2">) </span><span class="s0">if </span><span class="s1">num </span><span class="s0">else </span><span class="s4">1</span>
+    <span class="s0">return </span><span class="s1">dict</span><span class="s2">(</span><span class="s1">element_count</span><span class="s2">)</span>
+
+<span class="s0">def </span><span class="s1">parse_side</span><span class="s2">(</span><span class="s1">side</span><span class="s2">):</span>
+    <span class="s1">molecules </span><span class="s2">= </span><span class="s1">side</span><span class="s2">.</span><span class="s1">split</span><span class="s2">(</span><span class="s3">&quot;+&quot;</span><span class="s2">)</span>
+    <span class="s0">return </span><span class="s2">[</span><span class="s1">parse_molecule</span><span class="s2">(</span><span class="s1">m</span><span class="s2">.</span><span class="s1">strip</span><span class="s2">()) </span><span class="s0">for </span><span class="s1">m </span><span class="s0">in </span><span class="s1">molecules</span><span class="s2">]</span>
+
+<span class="s0">def </span><span class="s1">balance_equation</span><span class="s2">(</span><span class="s1">equation</span><span class="s2">):</span>
+    <span class="s1">left</span><span class="s2">, </span><span class="s1">right </span><span class="s2">= </span><span class="s1">equation</span><span class="s2">.</span><span class="s1">split</span><span class="s2">(</span><span class="s3">&quot;-&gt;&quot;</span><span class="s2">)</span>
+    <span class="s1">left_moles </span><span class="s2">= </span><span class="s1">parse_side</span><span class="s2">(</span><span class="s1">left</span><span class="s2">)</span>
+    <span class="s1">right_moles </span><span class="s2">= </span><span class="s1">parse_side</span><span class="s2">(</span><span class="s1">right</span><span class="s2">)</span>
+
+    <span class="s1">elements </span><span class="s2">= </span><span class="s1">set</span><span class="s2">()</span>
+    <span class="s0">for </span><span class="s1">m </span><span class="s0">in </span><span class="s1">left_moles </span><span class="s2">+ </span><span class="s1">right_moles</span><span class="s2">:</span>
+        <span class="s1">elements</span><span class="s2">.</span><span class="s1">update</span><span class="s2">(</span><span class="s1">m</span><span class="s2">.</span><span class="s1">keys</span><span class="s2">())</span>
+    <span class="s1">elements </span><span class="s2">= </span><span class="s1">sorted</span><span class="s2">(</span><span class="s1">elements</span><span class="s2">)</span>
+
+
+    <span class="s1">matrix </span><span class="s2">= []</span>
+    <span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">elements</span><span class="s2">:</span>
+        <span class="s1">row </span><span class="s2">= []</span>
+        <span class="s0">for </span><span class="s1">m </span><span class="s0">in </span><span class="s1">left_moles</span><span class="s2">:</span>
+            <span class="s1">row</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(</span><span class="s1">m</span><span class="s2">.</span><span class="s1">get</span><span class="s2">(</span><span class="s1">i</span><span class="s2">, </span><span class="s4">0</span><span class="s2">))</span>
+        <span class="s0">for </span><span class="s1">m </span><span class="s0">in </span><span class="s1">right_moles</span><span class="s2">:</span>
+            <span class="s1">row</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(-</span><span class="s1">m</span><span class="s2">.</span><span class="s1">get</span><span class="s2">(</span><span class="s1">i</span><span class="s2">, </span><span class="s4">0</span><span class="s2">))</span>
+        <span class="s1">matrix</span><span class="s2">.</span><span class="s1">append</span><span class="s2">(</span><span class="s1">row</span><span class="s2">)</span>
+
+    <span class="s1">matrix </span><span class="s2">= </span><span class="s1">Matrix</span><span class="s2">(</span><span class="s1">matrix</span><span class="s2">)</span>
+    <span class="s1">solution </span><span class="s2">= </span><span class="s1">matrix</span><span class="s2">.</span><span class="s1">nullspace</span><span class="s2">()</span>
+    <span class="s0">if not </span><span class="s1">solution</span><span class="s2">:</span>
+        <span class="s0">raise </span><span class="s1">ValueError</span><span class="s2">(</span><span class="s3">&quot;Cannot balance equation&quot;</span><span class="s2">)</span>
+
+    <span class="s1">coefficients </span><span class="s2">= </span><span class="s1">solution</span><span class="s2">[</span><span class="s4">0</span><span class="s2">]</span>
+    <span class="s1">lcm_val </span><span class="s2">= </span><span class="s1">lcm</span><span class="s2">([</span><span class="s1">r</span><span class="s2">.</span><span class="s1">q </span><span class="s0">for </span><span class="s1">r </span><span class="s0">in </span><span class="s1">coefficients</span><span class="s2">])</span>
+    <span class="s1">coeffs </span><span class="s2">= [</span><span class="s1">int</span><span class="s2">(</span><span class="s1">r </span><span class="s2">* </span><span class="s1">lcm_val</span><span class="s2">) </span><span class="s0">for </span><span class="s1">r </span><span class="s0">in </span><span class="s1">coefficients</span><span class="s2">]</span>
+
+    <span class="s0">def </span><span class="s1">_gcd</span><span class="s2">(</span><span class="s1">a</span><span class="s2">, </span><span class="s1">b</span><span class="s2">):</span>
+        <span class="s1">a</span><span class="s2">, </span><span class="s1">b </span><span class="s2">= </span><span class="s1">abs</span><span class="s2">(</span><span class="s1">a</span><span class="s2">), </span><span class="s1">abs</span><span class="s2">(</span><span class="s1">b</span><span class="s2">)</span>
+        <span class="s0">while </span><span class="s1">b</span><span class="s2">:</span>
+            <span class="s1">a</span><span class="s2">, </span><span class="s1">b </span><span class="s2">= </span><span class="s1">b</span><span class="s2">, </span><span class="s1">a </span><span class="s2">% </span><span class="s1">b</span>
+        <span class="s0">return </span><span class="s1">a</span>
+
+    <span class="s1">g </span><span class="s2">= </span><span class="s4">0</span>
+    <span class="s0">for </span><span class="s1">x </span><span class="s0">in </span><span class="s1">coeffs</span><span class="s2">:</span>
+        <span class="s1">g </span><span class="s2">= </span><span class="s1">_gcd</span><span class="s2">(</span><span class="s1">g</span><span class="s2">, </span><span class="s1">x</span><span class="s2">)</span>
+    <span class="s0">if </span><span class="s1">g </span><span class="s2">&gt; </span><span class="s4">1</span><span class="s2">:</span>
+        <span class="s1">coeffs </span><span class="s2">= [</span><span class="s1">x </span><span class="s2">// </span><span class="s1">g </span><span class="s0">for </span><span class="s1">x </span><span class="s0">in </span><span class="s1">coeffs</span><span class="s2">]</span>
+
+    <span class="s1">n_left </span><span class="s2">= </span><span class="s1">len</span><span class="s2">(</span><span class="s1">left_moles</span><span class="s2">)</span>
+    <span class="s1">left_coeffs </span><span class="s2">= </span><span class="s1">coeffs</span><span class="s2">[:</span><span class="s1">n_left</span><span class="s2">]</span>
+    <span class="s1">right_coeffs </span><span class="s2">= </span><span class="s1">coeffs</span><span class="s2">[</span><span class="s1">n_left</span><span class="s2">:]</span>
+
+    <span class="s0">def </span><span class="s1">all_positive</span><span class="s2">(</span><span class="s1">lst</span><span class="s2">):</span>
+        <span class="s0">return </span><span class="s1">all</span><span class="s2">(</span><span class="s1">x </span><span class="s2">&gt; </span><span class="s4">0 </span><span class="s0">for </span><span class="s1">x </span><span class="s0">in </span><span class="s1">lst</span><span class="s2">)</span>
+
+    <span class="s0">if not </span><span class="s2">(</span><span class="s1">all_positive</span><span class="s2">(</span><span class="s1">left_coeffs</span><span class="s2">) </span><span class="s0">and </span><span class="s1">all_positive</span><span class="s2">(</span><span class="s1">right_coeffs</span><span class="s2">)):</span>
+        <span class="s1">neg </span><span class="s2">= [-</span><span class="s1">x </span><span class="s0">for </span><span class="s1">x </span><span class="s0">in </span><span class="s1">coeffs</span><span class="s2">]</span>
+        <span class="s1">left_n </span><span class="s2">= </span><span class="s1">neg</span><span class="s2">[:</span><span class="s1">n_left</span><span class="s2">]</span>
+        <span class="s1">right_n </span><span class="s2">= </span><span class="s1">neg</span><span class="s2">[</span><span class="s1">n_left</span><span class="s2">:]</span>
+        <span class="s0">if </span><span class="s1">all_positive</span><span class="s2">(</span><span class="s1">left_n</span><span class="s2">) </span><span class="s0">and </span><span class="s1">all_positive</span><span class="s2">(</span><span class="s1">right_n</span><span class="s2">):</span>
+            <span class="s1">coeffs </span><span class="s2">= </span><span class="s1">neg</span>
+            <span class="s1">left_coeffs </span><span class="s2">= </span><span class="s1">left_n</span>
+            <span class="s1">right_coeffs </span><span class="s2">= </span><span class="s1">right_n</span>
+        <span class="s0">else</span><span class="s2">:</span>
+            <span class="s0">raise </span><span class="s1">ValueError</span><span class="s2">(</span><span class="s3">&quot;Cannot balance equation without moving species across the arrow&quot;</span><span class="s2">)</span>
+
+    <span class="s1">left_str </span><span class="s2">= </span><span class="s3">&quot; + &quot;</span><span class="s2">.</span><span class="s1">join</span><span class="s2">(</span><span class="s3">f&quot;</span><span class="s0">{</span><span class="s1">c </span><span class="s0">if </span><span class="s1">c</span><span class="s2">&gt;</span><span class="s4">1 </span><span class="s0">else </span><span class="s3">''</span><span class="s0">}{</span><span class="s1">m</span><span class="s0">}</span><span class="s3">&quot; </span><span class="s0">for </span><span class="s1">c</span><span class="s2">, </span><span class="s1">m </span><span class="s0">in </span><span class="s1">zip</span><span class="s2">(</span><span class="s1">left_coeffs</span><span class="s2">, </span><span class="s1">left</span><span class="s2">.</span><span class="s1">split</span><span class="s2">(</span><span class="s3">&quot;+&quot;</span><span class="s2">)))</span>
+    <span class="s1">right_str </span><span class="s2">= </span><span class="s3">&quot; + &quot;</span><span class="s2">.</span><span class="s1">join</span><span class="s2">(</span><span class="s3">f&quot;</span><span class="s0">{</span><span class="s1">c </span><span class="s0">if </span><span class="s1">c</span><span class="s2">&gt;</span><span class="s4">1 </span><span class="s0">else </span><span class="s3">''</span><span class="s0">}{</span><span class="s1">m</span><span class="s0">}</span><span class="s3">&quot; </span><span class="s0">for </span><span class="s1">c</span><span class="s2">, </span><span class="s1">m </span><span class="s0">in </span><span class="s1">zip</span><span class="s2">(</span><span class="s1">right_coeffs</span><span class="s2">, </span><span class="s1">right</span><span class="s2">.</span><span class="s1">split</span><span class="s2">(</span><span class="s3">&quot;+&quot;</span><span class="s2">)))</span>
+
+    <span class="s0">return </span><span class="s3">f&quot;</span><span class="s0">{</span><span class="s1">left_str</span><span class="s0">} </span><span class="s3">-&gt; </span><span class="s0">{</span><span class="s1">right_str</span><span class="s0">}</span><span class="s3">&quot;</span>
+
+
+<span class="s1">print</span><span class="s2">(</span><span class="s3">&quot;Enter a chemical equation using '-&gt;'. Example: H2 + O2 -&gt; H2O&quot;</span><span class="s2">)</span>
+<span class="s1">equation </span><span class="s2">= </span><span class="s1">input</span><span class="s2">(</span><span class="s3">&quot;Equation: &quot;</span><span class="s2">)</span>
+
+<span class="s0">try</span><span class="s2">:</span>
+    <span class="s1">balanced </span><span class="s2">= </span><span class="s1">balance_equation</span><span class="s2">(</span><span class="s1">equation</span><span class="s2">)</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s3">&quot;Balanced equation: &quot;</span><span class="s2">)</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s1">balanced</span><span class="s2">)</span>
+<span class="s0">except </span><span class="s1">Exception </span><span class="s0">as </span><span class="s1">e</span><span class="s2">:</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s3">&quot;Error:&quot;</span><span class="s2">, </span><span class="s1">e</span><span class="s2">)</span>
+</pre>
+</body>
+</html>
