@@ -14,7 +14,6 @@
 </head>
 <body bgcolor="#1e1f22">
 <table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
-<tr><td><center>
 </center></td></tr></table>
 <pre><span class="s0">from </span><span class="s1">collections </span><span class="s0">import </span><span class="s1">defaultdict</span>
 <span class="s0">from </span><span class="s1">sympy </span><span class="s0">import </span><span class="s1">Matrix</span><span class="s2">, </span><span class="s1">lcm</span>
@@ -44,7 +43,7 @@
     Raises ValueError if an unknown element symbol is encountered. 
     &quot;&quot;&quot;</span>
 
-    <span class="s3"># stack holds previous element_count dicts when entering parenthesis groups</span>
+    <span class="s3"># stack holds previous element_count dicts when entering parenthesis groups to keep track of nesting</span>
     <span class="s1">stack </span><span class="s2">= []</span>
     <span class="s1">element_count </span><span class="s2">= </span><span class="s1">defaultdict</span><span class="s2">(</span><span class="s1">int</span><span class="s2">)</span>
     <span class="s1">i </span><span class="s2">= </span><span class="s6">0</span>
